@@ -1,3 +1,16 @@
+#!/bin/env python
+# -*- coding: UTF-8 -*-
+#
+# (c) Chiara Malagoli
+#
+# v 0.0.1.2
+#
+# file: mailmetheerror.py
+# auth: Chiara Malagoli <malagoli@gbinside.com>
+# desc:
+#
+# --------------
+
 from hashlib import md5
 import mailmetheerror
 import threading

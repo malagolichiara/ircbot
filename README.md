@@ -1,3 +1,8 @@
+IRCBOT
+------
+
+A little framework for an IRC bot written in Python!
+
 
 TODO
 ----
