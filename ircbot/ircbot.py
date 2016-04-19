@@ -92,7 +92,7 @@ class CommThread(threading.Thread):
                         if fx(self, line, line_list, message_on_channel, self.lock, self.data):
                             break
                     except Exception as e:
-                        self.send_to_channel('EXCEPTION: {} {}'.format(fx, e.message))
+                        self.send_to_channel('EXCEPTION: {} {}'.format(getattr(fx, 'name', fx), e.message))
                 else:  # fallback
                     for fx in self.fallback_callback_list:
                         try:
