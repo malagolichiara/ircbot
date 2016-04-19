@@ -14,27 +14,17 @@
 import os
 import socket
 import ssl
-import sys
 import threading
 import time
 
 import plugins
 
-HOST = "euroserv.fr.quakenet.org"
-PORT = 6667
-NICK = "Kabot"
-IDENT = "kabot"
-REALNAME = "Gbinside Bot"
-# CHANNEL = "#" + md5(time.strftime('%Y%m%d')).hexdigest()
-CHANNEL = "#kabot"
-CHANNELPASSWORD = '12345'  # or None
-SSL = False  # or put the filename for the certificates
-
 
 class CommThread(threading.Thread):
-    def __init__(self, **kargv):
+    def __init__(self, config):
         threading.Thread.__init__(self)
-        self.data = dict(kargv)
+        self.config = dict(config)  # copy
+        self.data = dict()
         self.lock = threading.Lock()
         self.readbuffer = ""
         self.callback_list = []
@@ -44,9 +34,9 @@ class CommThread(threading.Thread):
 
     def _connect(self):
         s = socket.socket()
-        s.connect((self.data['host'], self.data['port']))
+        s.connect((self.config['host'], self.config['port']))
         self.readbuffer = ""
-        self.sock = ssl.wrap_socket(s, cert_reqs=ssl.CERT_REQUIRED, ca_certs=self.data['ssl']) if self.data[
+        self.sock = ssl.wrap_socket(s, cert_reqs=ssl.CERT_REQUIRED, ca_certs=self.config['ssl']) if self.config[
             'ssl'] else s
         return self.sock
 
@@ -63,7 +53,7 @@ class CommThread(threading.Thread):
         self.send_list.append(msg)
 
     def send_to_channel(self, msg):
-        return self.send("PRIVMSG {} :{}\r\n".format(self.data['channel'], msg.rstrip()))
+        return self.send("PRIVMSG {} :{}\r\n".format(self.config['channel'], msg.rstrip()))
 
     def send_now(self, msg):
         with self.lock:
@@ -92,7 +82,7 @@ class CommThread(threading.Thread):
                 message_on_channel = None
                 line = line.rstrip()
                 line_list = tuple(line.split())
-                if line_list[1] == "PRIVMSG" and line_list[2] == self.data['channel'] and line_list[3][0] == ':':
+                if line_list[1] == "PRIVMSG" and line_list[2] == self.config['channel'] and line_list[3][0] == ':':
                     message_on_channel = line_list[3][1:]
 
                 print '<----', line
@@ -116,11 +106,10 @@ class CommThread(threading.Thread):
                         self.sock.send(self.send_list.pop(0))
 
 
-def main(argv=None):
+def main(**config):
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    comm_thread = CommThread(host=HOST, port=PORT, nick=NICK, id=IDENT, realname=REALNAME, channel=CHANNEL, ssl=SSL,
-                             channel_password=CHANNELPASSWORD)
+    comm_thread = CommThread(config)
 
     plugins.init(comm_thread)
 
@@ -128,7 +117,3 @@ def main(argv=None):
 
     comm_thread.join()
     return 0
-
-
-if __name__ == '__main__':
-    sys.exit(main(sys.argv))

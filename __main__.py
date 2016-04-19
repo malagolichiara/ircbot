@@ -18,5 +18,17 @@ exec python $0 ${1+"$@"}
 from ircbot import main
 import sys
 
+config = dict(
+    host="euroserv.fr.quakenet.org",
+    port=6667,
+    nick="Kabot",
+    ident="kabot",
+    realname="Gbinside Bot",
+    # channel = "#" + md5(time.strftime('%Y%m%d')).hexdigest(),
+    channel="#kabot",
+    channel_password='12345',  # or None
+    ssl=False  # or put the filename for the certificates
+)
+
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main(**config))
