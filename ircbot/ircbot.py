@@ -11,15 +11,14 @@
 #
 # --------------
 
-from hashlib import md5
-import mailmetheerror
-import threading
-import plugins
-import socket
-import time
-import sys
-import ssl
 import os
+import socket
+import ssl
+import sys
+import threading
+import time
+
+import plugins
 
 HOST = "euroserv.fr.quakenet.org"
 PORT = 6667
