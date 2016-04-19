@@ -3,7 +3,7 @@
 #
 # (c) Chiara Malagoli
 #
-# v 0.0.1.2
+# v 0.0.1.3
 #
 # file: mailmetheerror.py
 # auth: Chiara Malagoli <malagoli@gbinside.com>
@@ -52,6 +52,9 @@ class CommThread(threading.Thread):
     def send(self, msg):
         self.send_list.append(msg)
 
+    def sendcrlf(self, msg):
+        self.send_list.append(msg + '\r\n')
+
     def send_to_channel(self, msg):
         return self.send("PRIVMSG {} :{}\r\n".format(self.config['channel'], msg.rstrip()))
 
@@ -69,6 +72,7 @@ class CommThread(threading.Thread):
         self._connect()
 
         while 1:
+            flood_wait = self.config.get('flood_wait', None)  # it is in the main loop so plugins can change the value.
             time.sleep(0.1)
             try:
                 self.readbuffer += self.sock.recv(1024)
@@ -100,10 +104,20 @@ class CommThread(threading.Thread):
                         except Exception as e:
                             self.send_to_channel('EXCEPTION: {} {}'.format(getattr(fx, 'name', fx), e.message))
 
-                while self.send_list:
+                loop_break = False
+                while not loop_break and self.send_list:
                     print '---->', self.send_list[0].rstrip()
                     with self.lock:
-                        self.sock.send(self.send_list.pop(0))
+                        try:
+                            self.sock.send(self.send_list[0])
+                            self.send_list.pop(0)
+                        except socket.error, e:
+                            self.sock.close()
+                            time.sleep(flood_wait)
+                            self._connect()
+                            loop_break = True
+                        if flood_wait:
+                            time.sleep(flood_wait)
 
 
 def main(**config):

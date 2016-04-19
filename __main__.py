@@ -21,6 +21,7 @@ import sys
 config = dict(
     host="euroserv.fr.quakenet.org",
     port=6667,
+    flood_wait=1.0,
     nick="Kabot",
     ident="kabot",
     realname="Gbinside Bot",

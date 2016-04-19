@@ -1,4 +1,5 @@
 import threading
+import socket
 import time
 
 OPLIST = (
@@ -30,4 +31,8 @@ def process(comm_thread, line, line_list, message_on_channel, lock, data):
 def async(comm_thread):
     while 1:
         time.sleep(60)
-        comm_thread.send_now("NAMES %s\r\n" % comm_thread.config['channel'])
+        try:
+            comm_thread.send_now("NAMES %s\r\n" % comm_thread.config['channel'])
+        except socket.error,e:
+            pass
+
